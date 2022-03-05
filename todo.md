@@ -1,50 +1,59 @@
-# Generate migration
+# Insert some employees
 ```
-edgedb migration create
-```
-
-# Apply migration
-```
-edgedb migrate
-```
-
-# Insert some companies
-```
-insert Company {
-    name := "Fram",
-    address := "Ho Chi Minh city",
-};
-
 for data in {
-    ("Sioux", "Da Nang"),
-    ("MGM", "Da Nang"),
-    ("Paradox", "Ha Noi")
-}
-union(
-    insert Company {
-        name := data.0,
-        address := data.1
+    ("Ha", "Pham"),
+    ("Trung", "Truong"),
+    ("Long", "Chau"),
+} 
+union (
+    insert Employee {
+        first_name := data.0,
+        last_name := data.1
     }
 );
+```
+
+# Query employees
+```
+select Employee;
+
+select Employee { first_name, last_name, full_name };
+
+select Employee { full_name } filter .first_name = 'Trung';
+
+select Employee { name, address } filter .last_name like '%h%';
+```
+
+# Update company to set employees
+```
+update Company 
+filter .name = 'Fram'
+set {
+    employees += (insert Employee { first_name := 'Huy', last_name := 'Duong' })
+};
+
+update Company 
+filter .name = 'Fram'
+set {
+    employees += (select Employee filter .full_name like '%u%')
+};
 
 ```
 
-# Query companies
-```
-select Company;
-
-select Company { name };
-
-select Company { name, address };
-
-select Company { name, address };
-select Company { name, address } filter .address like '%Nang';
-```
-
-# Delete company
+# Query company with employees
 
 ```
-select (delete Company filter .name = 'Paradox').name;
+select Company {
+    name,
+    address,
+    employees: {
+        full_name
+    }
+};
+```
 
-delete Company;
+# Delete employees
+
+```
+delete Employee filter .full_name = 'Long Chau'
 ```

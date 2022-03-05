@@ -17,26 +17,15 @@
 ---
 
 # WHAT IS EDGEDB
-- A new generation of object-relational database
 - Based on PostgreSQL
+- A new generation of object-relational database
 - New query language: EdgeQL
-```edgeql
-select Person {
-    name,
-    age,
-    address: {
-        number,
-        street,
-        state
-    }
-}
-filter .age > 18
-```
+
 ---
+
 # LITTLE SHOW UP FIRST
 
-### The old way
-SQL:
+### The old SQL way
 ```SQL
 CREATE TABLE IF NOT EXISTS imports
 (
@@ -66,9 +55,7 @@ CREATE TABLE IF NOT EXISTS import_analytics
 ---
 # LITTLE SHOW UP FIRST
 
-### The new-generation way
-
-EdgeQL:
+### The new-generation EdgeQL way
 ```EdgeQL
 scalar type ImportStatus extending enum<Pending, InProgress, Finished>;
 
@@ -97,13 +84,48 @@ type ImportAnalytics {
 
 ---
 
+# LITTLE SHOW UP FIRST
+
+### The old-SQL way
+
+```sql
+with authors_with_many_books as (
+    select authors.id
+    from authors 
+        inner join books on book.author_id = authors.id
+    group by authors.id
+    having count(book.id) > 1
+)
+select books.title, authors.full_name
+from books
+    inner join authors on books.author_id = author.id
+where book.author_id in authors_with_many_books
+
+```
+
+---
+
+# LITTLE SHOW UP FIRST
+
+### The new-generation EdgeQL way
+
+```EdgeQL
+select Book {
+    title,
+    author := .<books[is Author].full_name
+}
+filter .<books[is Author] in (select Author filter count(.books) > 1)
+
+```
+
+
+---
+
 # INSTALLATION
 
-**Just one command**
-```
-curl --proto '=https' --tlsv1.2 -sSf https://sh.edgedb.com | sh
+Just one command
+`curl --proto '=https' --tlsv1.2 -sSf https://sh.edgedb.com | sh`
 
-```
 
 ---
 
@@ -115,7 +137,9 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.edgedb.com | sh
     - version
     - starting instance automatically on login
 
+---
 
+# SETUP PROJECT
 ## File structure
 ```
 drwxr-xr-x   - hapham  5 Mar 13:32 .
@@ -126,13 +150,28 @@ drwxr-xr-x   - hapham  5 Mar 13:32 │  └── migrations
 ```
 
 - The declarative database schema in `dbschema/default.esdl`
-- Migrations will be generated automatically: `edgedb migration create`
-- Applying the migrations: `edgedb migrate`
+- Auto-generated migrations in `dbschema/migrations/`
+- Project config in `edgedb.toml`
 
-## Connect to database instance
-Execute the command `edgedb`
+---
 
-## More useful commands
+# MIGRATION
+
+## Migrations will be generated automatically
+`edgedb migration create`
+## Applying the migrations
+`edgedb migrate`
+
+---
+
+# CONNECT TO DATABASE
+
+`edgedb`
+- No other arguments (instance name, user, password)
+
+---
+
+# MORE COMMANDS
 - Listing all instances: `edgedb instance list`
 - Starting an instance: `edgedb instance start`
 - Basic project information: `edgedb project info`
@@ -140,9 +179,32 @@ Execute the command `edgedb`
 
 ---
 
-# EDGEQL BASIC
+# EDGEQL
 
+- Strongly typed
+- No `NULL`, just `{}`
 - No `TABLE`, just `TYPE`
-- No `REFERENCE`, just `LINK`
-- `INHERITANCE`
+- No `REFERENCE`, no `JOIN`, just `LINK`
+- Support `INHERITANCE`
 
+---
+
+# CLIENTS
+
+- JavaScript/TypeScript
+- Python
+- Go
+- HTTP (EdgeQL/GraphQL)
+
+---
+
+# TIME TO PRACTICE
+
+```
+██████╗░██████╗░░█████╗░░█████╗░████████╗██╗░█████╗░███████╗
+██╔══██╗██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝██║██╔══██╗██╔════╝
+██████╔╝██████╔╝███████║██║░░╚═╝░░░██║░░░██║██║░░╚═╝█████╗░░
+██╔═══╝░██╔══██╗██╔══██║██║░░██╗░░░██║░░░██║██║░░██╗██╔══╝░░
+██║░░░░░██║░░██║██║░░██║╚█████╔╝░░░██║░░░██║╚█████╔╝███████╗
+╚═╝░░░░░╚═╝░░╚═╝╚═╝░░╚═╝░╚════╝░░░░╚═╝░░░╚═╝░╚════╝░╚══════╝
+```

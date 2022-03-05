@@ -1,16 +1,54 @@
-# Query the employee types
+# Insert some documents
 ```
-select Employee { employee_type };
+insert Certificate {
+    file_name := '/cert/toeic-hapham.pdf',
+    issue_date := <datetime>'2022-01-01T08:52:37+07:00'
+};
+
+insert Contract {
+    file_name := '/contract/huy.duong.pdf',
+    length := 3
+};
+
+insert Contract {
+    file_name := '/contract/ha.pham.pdf',
+    length := 3
+};
+```
+# Query the documents
+```
+select Document { file_name };
+
+select Document { file_name, is_contract := Document is Contract };
+
+select Document {
+    file_name,
+    [is Certificate].issue_date,
+    [is Contract].length,
+};
 ```
 
-# Insert new employee
+# Assign documents for employees
 ```
-insert Employee { first_name := 'Nam', last_name := 'Tran' };
+update Employee
+filter .last_name = 'Pham'
+set {
+    documents := (select Document filter .file_name like '%pham%')
+};
 
-insert Employee { first_name := 'Quan', last_name := 'Tran', employee_type := EmployeeType.External };
+update Employee
+filter .first_name = 'Huy'
+set {
+    documents += (select Document filter .file_name like '%huy%')
+};
 ```
 
-# Query the employee by type
+# Query employee to see documents
 ```
-select Employee { full_name } filter .employee_type = EmployeeType.External;
+select Employee {
+    full_name,
+    documents: {
+        file_name
+    }
+};
 ```

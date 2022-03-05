@@ -13,10 +13,15 @@ module default {
         required property first_name -> str;
         required property last_name -> str;
         property full_name := .first_name ++ ' ' ++ .last_name;
+        property employee_type -> EmployeeType {
+            default := EmployeeType.Internal
+        };
 
         # Full name must be exclusive
         constraint exclusive on ((.first_name, .last_name)) {
             errmessage := 'Full name must be unique'
         }
     }
+
+    scalar type EmployeeType extending enum<Internal, External>;
 }

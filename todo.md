@@ -1,12 +1,16 @@
-# Insert Company violating the constraints
-
+# Query the employee types
 ```
-insert Company { name := 'Fram', address := "Da Nang" };
-
-insert Company { name := 'New company', address := 'This is a really long address for a company' };
+select Employee { employee_type };
 ```
 
-# Insert Employee violating the constraint
+# Insert new employee
 ```
-insert Employee { first_name := 'Long', last_name := 'Chau' };
+insert Employee { first_name := 'Nam', last_name := 'Tran' };
+
+insert Employee { first_name := 'Quan', last_name := 'Tran', employee_type := EmployeeType.External };
+```
+
+# Query the employee by type
+```
+select Employee { full_name } filter .employee_type = EmployeeType.External;
 ```
